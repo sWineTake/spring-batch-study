@@ -1,4 +1,4 @@
-package com.system.batch.parameters;
+package com.system.batch.section1.parameters;
 
 import lombok.Data;
 import org.springframework.batch.core.configuration.annotation.StepScope;

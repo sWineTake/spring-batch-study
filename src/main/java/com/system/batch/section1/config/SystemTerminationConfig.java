@@ -1,4 +1,4 @@
-package com.system.batch.config;
+package com.system.batch.section1.config;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.batch.core.Job;
