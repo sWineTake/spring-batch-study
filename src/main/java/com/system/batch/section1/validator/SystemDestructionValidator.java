@@ -31,7 +31,7 @@ public class SystemDestructionValidator implements JobParametersValidator {
                     "파괴력 수준이 허용치를 초과했습니다: " + destructionPower + " (최대 허용치: 9)");
         }
     }
-
+/*
     @Bean
     public Job systemDestructionJob(
             JobRepository jobRepository,
@@ -42,5 +42,5 @@ public class SystemDestructionValidator implements JobParametersValidator {
                 .validator(validator)
                 .start(systemDestructionStep)
                 .build();
-    }
+    }*/
 }
