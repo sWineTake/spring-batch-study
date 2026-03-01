@@ -2,6 +2,7 @@ package com.system.batch.section3.collection1;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import javax.sql.DataSource;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,12 @@ import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.batch.item.database.JdbcCursorItemReader;
+import org.springframework.batch.item.database.JdbcPagingItemReader;
+import org.springframework.batch.item.database.Order;
+import org.springframework.batch.item.database.PagingQueryProvider;
 import org.springframework.batch.item.database.builder.JdbcCursorItemReaderBuilder;
+import org.springframework.batch.item.database.builder.JdbcPagingItemReaderBuilder;
+import org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -23,6 +29,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @RequiredArgsConstructor
 // ./gradlew bootRun --args='--spring.batch.job.name=victimRecordJob'
+// ./gradlew bootRun --args='--spring.batch.job.name=terminatredVictimReader'
 public class VictimRecordConfig {
     private final JobRepository jobRepository;
     private final PlatformTransactionManager transactionManager;
@@ -39,7 +46,8 @@ public class VictimRecordConfig {
     public Step processVictimStep() {
         return new StepBuilder("victimRecordStep", jobRepository)
                 .<Victim, Victim>chunk(5, transactionManager)
-                .reader(terminatedVictimReader())
+                // .reader(terminatedVictimReader())
+                .reader(terminatredVictimReader())
                 .writer(victimWriter())
                 .build();
     }
@@ -79,6 +87,24 @@ public class VictimRecordConfig {
                     return victim;
                 })
                 */
+                .build();
+    }
+
+    @Bean
+    public JdbcPagingItemReader<Victim> terminatredVictimReader() {
+        return new JdbcPagingItemReaderBuilder<Victim>()
+                .name("terminatredVictimReader")
+                .dataSource(dataSource)
+                .pageSize(5)
+                .selectClause("SELECT id, name, process_id, terminated_at, status")
+                .fromClause("FROM victims")
+                .whereClause("WHERE status = :status AND terminated_at <= :terminatedAt")
+                .sortKeys(Map.of("id", Order.ASCENDING))
+                .parameterValues(Map.of(
+                    "status", "TERMINATED",
+                    "terminatedAt", LocalDateTime.now()
+                ))
+                .beanRowMapper(Victim.class)
                 .build();
     }
 
